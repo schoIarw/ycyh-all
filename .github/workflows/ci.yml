@@ -45,7 +45,7 @@ jobs:
           POSTGRES_PASSWORD: ci-only-db-password
           POSTGRES_DB: ycyh
         ports: ['5432:5432']
-        options: --health-cmd 'pg_isready -U ycyh -d ycyh' --health-interval 5s --health-timeout 3s --health-retries 20
+        options: --health-cmd "pg_isready -U ycyh -d ycyh" --health-interval 5s --health-timeout 3s --health-retries 20
       mysql:
         image: mysql:8.0
         env:
@@ -54,7 +54,7 @@ jobs:
           MYSQL_PASSWORD: ci-only-db-password
           MYSQL_DATABASE: ycyh
         ports: ['3306:3306']
-        options: --health-cmd 'mysqladmin ping -h 127.0.0.1 --silent' --health-interval 5s --health-timeout 3s --health-retries 30
+        options: --health-cmd "mysqladmin ping -h 127.0.0.1 --silent" --health-interval 5s --health-timeout 3s --health-retries 30
     env:
       DB_URL: ${{ matrix.jdbc }}
       DB_USER: ycyh
