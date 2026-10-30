@@ -1,0 +1,33 @@
+server:
+  port: ${PORT:8081}
+  error:
+    include-message: never
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: strict
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:5432/oversight}
+    username: ${DB_USER:ycyh}
+    password: ${DB_PASSWORD}
+  sql:
+    init:
+      mode: always
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+oversight:
+  api-key: ${OVERSIGHT_API_KEY}
+  allowed-hosts: ${SSH_ALLOWED_HOSTS:127.0.0.1}
+  allowed-users: ${SSH_ALLOWED_USERS:es}
+  private-key: ${SSH_PRIVATE_KEY:/home/oversight/.ssh/id_ed25519}
+  known-hosts: ${SSH_KNOWN_HOSTS:/home/oversight/.ssh/known_hosts}
+  ssh-command: ${SSH_COMMAND:ssh}
+  ssh-port: ${SSH_PORT:22}
+  timeout-seconds: ${SSH_TIMEOUT_SECONDS:1200}
+  admin-user: ${OVERSIGHT_ADMIN_USER:approver}
+  admin-password: ${OVERSIGHT_ADMIN_PASSWORD}

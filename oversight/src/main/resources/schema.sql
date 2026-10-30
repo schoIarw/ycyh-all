@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS scripts (
+ id VARCHAR(36) PRIMARY KEY, name VARCHAR(200) NOT NULL, script_type VARCHAR(20) NOT NULL,
+ content TEXT NOT NULL, created_at VARCHAR(40) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS executions (
+ id VARCHAR(36) PRIMARY KEY, script_id VARCHAR(36) NOT NULL, host_ip VARCHAR(45) NOT NULL,
+ username VARCHAR(64) NOT NULL, status VARCHAR(20) NOT NULL, created_at VARCHAR(40) NOT NULL,
+ finished_at VARCHAR(40), reason VARCHAR(100)
+);
+CREATE TABLE IF NOT EXISTS applications (
+ id VARCHAR(36) PRIMARY KEY, kind VARCHAR(24) NOT NULL, script_uuid VARCHAR(36) NOT NULL,
+ name VARCHAR(200) NOT NULL, content TEXT, targets TEXT NOT NULL, status VARCHAR(24) NOT NULL,
+ result INTEGER, results TEXT, sha256 VARCHAR(64) NOT NULL,
+ created_at VARCHAR(40) NOT NULL, approved_at VARCHAR(40), finished_at VARCHAR(40),
+ approver VARCHAR(100), reason VARCHAR(500)
+);

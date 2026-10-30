@@ -1,0 +1,10 @@
+Build date: 2026-10-30 (Asia/Shanghai)
+Java: Eclipse Temurin 11.0.32.1+1, compiler release 11
+Maven: 3.9.9
+Maven verify: BUILD SUCCESS
+Regular tests: 14 passed, zero failures/errors
+Optional SSH integration: separately enabled, 1 passed (OpenSSH client / userland SSH fixture)
+Shell framework/archive tests: 5 passed
+Real HTTP / session / database / approval smoke: passed (test-only H2 compatibility mode)
+Real PostgreSQL/MySQL services and real Elasticsearch archives: not executed in this environment
+Runtime jar checksums: dist/SHA256SUMS

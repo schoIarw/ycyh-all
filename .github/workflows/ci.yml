@@ -1,0 +1,112 @@
+name: JDK11 build and database smoke
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+      - run: python3 scripts/assemble.py --check
+      - run: bash -n clustermgr/src/main/resources/scripts/install-es.sh
+      - run: python3 tests/framework-test.py
+      - run: mvn -B -ntp clean verify
+      - run: python3 -m pip install paramiko
+      - run: python3 tests/ssh-userland.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: java11-jars
+          path: '*/target/*-0.1.0.jar'
+  database-smoke:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - database: postgres
+            jdbc: jdbc:postgresql://127.0.0.1:5432/ycyh
+          - database: mysql
+            jdbc: jdbc:mysql://127.0.0.1:3306/ycyh?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ycyh
+          POSTGRES_PASSWORD: ci-only-db-password
+          POSTGRES_DB: ycyh
+        ports: ['5432:5432']
+        options: --health-cmd 'pg_isready -U ycyh -d ycyh' --health-interval 5s --health-timeout 3s --health-retries 20
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only-root-password
+          MYSQL_USER: ycyh
+          MYSQL_PASSWORD: ci-only-db-password
+          MYSQL_DATABASE: ycyh
+        ports: ['3306:3306']
+        options: --health-cmd 'mysqladmin ping -h 127.0.0.1 --silent' --health-interval 5s --health-timeout 3s --health-retries 30
+    env:
+      DB_URL: ${{ matrix.jdbc }}
+      DB_USER: ycyh
+      DB_PASSWORD: ci-only-db-password
+      OVERSIGHT_API_KEY: ci-only-api-key-at-least-32-characters
+      OVERSIGHT_ADMIN_PASSWORD: ci-only-approval-password
+      ADMIN_PASSWORD: ci-only-admin-password
+      ALLOW_INSECURE_ES: 'true'
+      CLUSTER_HOSTS: 127.0.0.1@es
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - uses: actions/download-artifact@v4
+        with:
+          name: java11-jars
+          path: artifacts
+      - name: Start isolated smoke services
+        run: |
+          mkdir -p smoke-repository logs
+          printf 'fixture-only-rejected-never-installed' > smoke-repository/elasticsearch-8.17.0-linux-x86_64.tar.gz
+          java -jar artifacts/warehouse/target/warehouse-0.1.0.jar ./smoke-repository 8082 > logs/warehouse.log 2>&1 &
+          PORT=8081 java -jar artifacts/oversight/target/oversight-0.1.0.jar > logs/oversight.log 2>&1 &
+          PORT=8080 java -jar artifacts/clustermgr/target/clustermgr-0.1.0.jar > logs/clustermgr.log 2>&1 &
+          curl --fail --silent --retry 30 --retry-connrefused --retry-delay 1 --max-time 3 http://127.0.0.1:8081/login > /dev/null
+          curl --fail --silent --retry 30 --retry-connrefused --retry-delay 1 --max-time 3 http://127.0.0.1:8080/login > /dev/null
+      - run: python3 tests/http-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-logs-${{ matrix.database }}
+          path: logs/
+
+  create-tag:
+    needs: [verify, database-smoke]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create immutable 0.1 tag after all checks pass
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = '0.1';
+            try {
+              const existing = await github.rest.git.getRef({...context.repo, ref: `tags/${tag}`});
+              core.info(`Tag ${tag} already exists at ${existing.data.object.sha}; leaving it unchanged.`);
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.git.createRef({...context.repo, ref: `refs/tags/${tag}`, sha: context.sha});
+              core.info(`Created tag ${tag} at tested commit ${context.sha}.`);
+            }

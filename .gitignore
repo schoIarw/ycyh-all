@@ -1,0 +1,14 @@
+**/target/
+.env
+config/*.yml
+!config/*.example.yml
+repository/*
+!repository/.gitkeep
+*.log
+*.pid
+.idea/
+__pycache__/
+*.pyc
+config/*.env
+!config/*.env.example
+dist/

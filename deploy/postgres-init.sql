@@ -1,0 +1,2 @@
+CREATE DATABASE oversight;
+CREATE DATABASE clustermgr;
