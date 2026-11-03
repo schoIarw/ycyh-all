@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 @Controller
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="oversight.legacy-enabled",havingValue="true")
 public class ApprovalController {
  private final ApplicationService service;
  public ApprovalController(ApplicationService service){this.service=service;}

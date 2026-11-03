@@ -8,7 +8,7 @@ STAGING=''
 LOG_FILE=''
 load_config() {
   command -v python3 >/dev/null || { echo 'python3 required' >&2; exit 10; }
-  eval "$(python3 - '__CONFIG_BASE64__' <<'PYCONFIG'
+  eval "$(python3 - "${1:-__CONFIG_BASE64__}" <<'PYCONFIG'
 import base64,json,os,shlex,sys
 nodes=json.loads(base64.b64decode(sys.argv[1]))['nodes']
 matched=[n for n in nodes if n['host_ip']==os.environ.get('YCYH_TARGET_IP')]
@@ -64,7 +64,7 @@ run_stage() {
   log "Completed $1"
 }
 framework_main() {
-  load_config
+  load_config "${1:-}"
   trap 'on_error "$LINENO"' ERR
   trap cleanup EXIT
   command -v curl >/dev/null

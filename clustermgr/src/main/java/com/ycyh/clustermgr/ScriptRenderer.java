@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ScriptRenderer {
  private final String template;private final ObjectMapper json;
  public ScriptRenderer(ObjectMapper json)throws Exception{this.json=json;try(java.io.InputStream in=new ClassPathResource("scripts/install-es.sh").getInputStream()){template=StreamUtils.copyToString(in,StandardCharsets.UTF_8);}}
+ public String configuration(Map<String,Object> config)throws Exception{return Base64.getEncoder().encodeToString(json.writeValueAsBytes(config));}
  public String render(Map<String,Object> config)throws Exception {
   return template.replace("__CONFIG_BASE64__",Base64.getEncoder().encodeToString(json.writeValueAsBytes(config)));
  }

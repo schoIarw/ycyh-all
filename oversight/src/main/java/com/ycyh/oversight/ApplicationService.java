@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="oversight.legacy-enabled",havingValue="true")
 public class ApplicationService {
  private final JdbcTemplate db;private final SshRunner runner;private final ObjectMapper json;private final TransactionTemplate tx;
  private final ThreadPoolExecutor jobs=new ThreadPoolExecutor(2,2,0,TimeUnit.SECONDS,new ArrayBlockingQueue<>(16),new ThreadPoolExecutor.AbortPolicy());

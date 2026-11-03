@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/v1")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="oversight.legacy-enabled",havingValue="true")
 public class ScriptController {
  private final ApplicationService service;private final ObjectMapper json;
  public ScriptController(ApplicationService service,ObjectMapper json){this.service=service;this.json=json;}

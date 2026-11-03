@@ -1,0 +1,992 @@
+{
+  "sourceSha256": "1a85113d3cd8ef9d00a5efdb8e0756498a9c606d92ba0187ce621e02f32c96ae",
+  "notes": "Response key/type skeletons extracted from user supplied V9 document. No example identifiers, names, addresses, secrets or script contents retained. startCommonTask response transcribed from embedded image5.",
+  "interfaces": [
+    {
+      "method": "GET",
+      "path": "/api/system/authority/getSecretToken",
+      "sourceParagraphRange": [
+        0,
+        63
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "exipreTime": "string",
+          "user": {
+            "id": "integer",
+            "synUserId": "null",
+            "sysmUserChatId": "null",
+            "idnumber": "null",
+            "email": "null",
+            "loginName": "string",
+            "access": "string",
+            "fullName": "string",
+            "telephone": "null",
+            "pwUpdateTime": "null",
+            "locked": "integer",
+            "adminPerm": "integer",
+            "firstLogin": "integer",
+            "publicAccess": "null",
+            "type": "integer",
+            "state": "integer",
+            "sysmCenterId": "null",
+            "deleted": "null",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "createTime": "integer",
+            "updatorId": "null",
+            "updatorName": "null",
+            "updateTime": "integer",
+            "orgId": "integer",
+            "postId": "integer",
+            "orgName": "string",
+            "postName": "string",
+            "listOrgPost": "null",
+            "isAutoLogin": "null",
+            "token": "null",
+            "userRoleRelId": "null",
+            "confirmPassword": "null",
+            "excludePassword": "null",
+            "userGroupUserRelId": "null",
+            "orgCode": "string",
+            "level": "integer",
+            "adaptorName": "null",
+            "commUserLoginEnable": "integer",
+            "verificationCode": "null"
+          },
+          "token": "string"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/groups/queryAgentInfoGroupRole",
+      "sourceParagraphRange": [
+        66,
+        140
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "sysmAgentInfoId": "integer",
+              "agentIp": "string",
+              "agentName": "string",
+              "agentPort": "integer",
+              "agentState": "integer",
+              "execUserName": "null",
+              "deviceName": "string",
+              "osName": "string",
+              "taskIpsId": "null",
+              "centerId": "null",
+              "centerName": "null",
+              "businessSystemNameList": [
+                "string"
+              ],
+              "businessSystemCodeList": [
+                "string"
+              ],
+              "machineRoom": "null",
+              "ipVfourNumber": "null",
+              "hostName": "string",
+              "tagNames": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer",
+          "size": "integer",
+          "startRow": "integer",
+          "endRow": "integer",
+          "pages": "integer",
+          "prePage": "integer",
+          "nextPage": "integer",
+          "isFirstPage": "boolean",
+          "isLastPage": "boolean",
+          "hasPreviousPage": "boolean",
+          "hasNextPage": "boolean",
+          "navigatePages": "integer",
+          "navigatepageNums": [
+            "integer"
+          ],
+          "navigateFirstPage": "integer",
+          "navigateLastPage": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskApply/scriptExecAuditing",
+      "sourceParagraphRange": [
+        141,
+        205
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "auditId": "integer",
+          "taskId": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskApply/listTaskApply",
+      "sourceParagraphRange": [
+        206,
+        279
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "scriptInfoId": "integer",
+              "uniqueUuid": "string",
+              "scriptNameZh": "string",
+              "scriptName": "string",
+              "scriptType": "string",
+              "execuser": "null",
+              "scriptLabel": "string",
+              "categoryId": "integer",
+              "scriptCategoryName": "string",
+              "level": "integer",
+              "platform": "string",
+              "scriptInfoVersionId": "integer",
+              "srcScriptUuid": "string",
+              "version": "string",
+              "updateTime": "string",
+              "creatorId": "null",
+              "creatorName": "string",
+              "createTime": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/listCloneTask",
+      "sourceParagraphRange": [
+        280,
+        379
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "iid": "integer",
+              "taskName": "string",
+              "scriptNameZh": "string",
+              "scriptName": "string",
+              "scriptLabel": "string",
+              "categoryId": "integer",
+              "scriptCategoryName": "string",
+              "platform": "string",
+              "creatorName": "string",
+              "version": "string",
+              "level": "integer",
+              "updateTime": "null",
+              "scriptInfoId": "integer",
+              "uniqueUuid": "string",
+              "scriptType": "string",
+              "execuser": "string",
+              "scriptInfoVersionId": "integer",
+              "srcScriptUuid": "string",
+              "eachNum": "integer",
+              "execDesc": "string",
+              "createTime": "string",
+              "taskType": "integer",
+              "timeout": "integer",
+              "driveMode": "integer",
+              "maxVersion": "string",
+              "auditorId": "null",
+              "taskScheduler": "integer",
+              "taskTime": "null",
+              "taskCron": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer",
+          "size": "integer",
+          "startRow": "integer",
+          "endRow": "integer",
+          "pages": "integer",
+          "prePage": "integer",
+          "nextPage": "integer",
+          "isFirstPage": "boolean",
+          "isLastPage": "boolean",
+          "hasPreviousPage": "boolean",
+          "hasNextPage": "boolean",
+          "navigatePages": "integer",
+          "navigatepageNums": [
+            "integer"
+          ],
+          "navigateFirstPage": "integer",
+          "navigateLastPage": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskExecute/listCompleteScriptTasks",
+      "sourceParagraphRange": [
+        380,
+        470
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "scriptTaskId": "integer",
+              "srcScriptUuid": "string",
+              "taskName": "string",
+              "eachNum": "integer",
+              "execUser": "null",
+              "taskScheduler": "integer",
+              "taskTime": "null",
+              "taskCron": "null",
+              "publishDesc": "null",
+              "startUser": "string",
+              "startTime": "string",
+              "endTime": "string",
+              "timeout": "null",
+              "taskTimeForDispaly": "null",
+              "type": "integer",
+              "driveMode": "integer",
+              "startType": "integer",
+              "applyUser": "string",
+              "auditUserId": "null",
+              "applyUserId": "null",
+              "scriptCategoryName": "string",
+              "scriptTaskInstanceId": "integer",
+              "scriptTaskInstanceState": "integer",
+              "runAgentCount": "integer",
+              "level": "integer",
+              "elapsedTime": "integer",
+              "scriptTaskSource": "null",
+              "version": "string",
+              "scriptNameZh": "string",
+              "scriptName": "string",
+              "workOrderNumber": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/runtime/listTaskRuntime",
+      "sourceParagraphRange": [
+        471,
+        547
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "id": "integer",
+              "scriptTaskId": "integer",
+              "taskInstanceId": "integer",
+              "srcScriptUuid": "string",
+              "state": "integer",
+              "scriptName": "string",
+              "agentIp": "string",
+              "agentPort": "integer",
+              "execUser": "null",
+              "providerIp": "null",
+              "providerPort": "null",
+              "startTime": "string",
+              "endTime": "string",
+              "elapsedTime": "integer",
+              "expectLastline": "null",
+              "expectType": "integer",
+              "timeout": "integer",
+              "timeoutValue": "integer",
+              "startType": "integer",
+              "createTime": "string",
+              "agentTaskId": "null",
+              "bizId": "string",
+              "scriptTaskIpsId": "integer",
+              "retry": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/scriptApi/runtime/getOutPutMessage",
+      "sourceParagraphRange": [
+        548,
+        569
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/getScriptTemplateDetail",
+      "sourceParagraphRange": [
+        570,
+        716
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "scriptNameZh": "string",
+          "scriptName": "string",
+          "scriptType": "string",
+          "execuser": "string",
+          "id": "integer",
+          "uniqueUuid": "string",
+          "editState": "integer",
+          "deleted": "integer",
+          "scriptLabel": "null",
+          "categoryId": "integer",
+          "checkBeforeExec": "integer",
+          "share": "integer",
+          "whiteCommand": "integer",
+          "visibleType": "integer",
+          "platforms": [
+            "string"
+          ],
+          "femscript": "integer",
+          "creatorId": "integer",
+          "creatorName": "string",
+          "updatorId": "integer",
+          "updatorName": "string",
+          "createTime": "null",
+          "updateTime": "null",
+          "platform": "string",
+          "scriptSource": "integer",
+          "orgCode": "string",
+          "categoryPath": "string",
+          "categoryDto": {
+            "id": "integer",
+            "parentId": "null",
+            "code": "null",
+            "name": "string",
+            "sort": "null",
+            "level": "integer",
+            "description": "null",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "updatorId": "integer",
+            "updatorName": "string",
+            "createTime": "string",
+            "updateTime": "string",
+            "children": [
+              {
+                "id": "integer",
+                "parentId": "integer",
+                "code": "null",
+                "name": "string",
+                "sort": "null",
+                "level": "integer",
+                "description": "null",
+                "creatorId": "integer",
+                "creatorName": "string",
+                "updatorId": "integer",
+                "updatorName": "string",
+                "createTime": "string",
+                "updateTime": "string",
+                "children": "null"
+              }
+            ]
+          },
+          "scriptVersionDto": {
+            "id": "integer",
+            "infoUniqueUuid": "string",
+            "srcScriptUuid": "string",
+            "version": "string",
+            "editState": "integer",
+            "useState": "integer",
+            "deleted": "integer",
+            "isDefault": "integer",
+            "description": "string",
+            "timeout": "integer",
+            "expectType": "integer",
+            "expectLastline": "null",
+            "paramflag": "integer",
+            "level": "integer",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "updatorId": "integer",
+            "updatorName": "string",
+            "createTime": "string",
+            "updateTime": "string",
+            "parameterValidationDtoList": [],
+            "scriptContentDto": {
+              "content": "string"
+            },
+            "variableList": [],
+            "functionList": [],
+            "dependentList": [],
+            "attachmentUploadDtoList": [
+              {
+                "name": "string",
+                "id": "null",
+                "response": {
+                  "id": "integer"
+                },
+                "size": "integer",
+                "contents": "string"
+              }
+            ]
+          },
+          "ignoreTipCmd": "null",
+          "hisVersionCount": "integer",
+          "insertedLabels": "null",
+          "removedLabels": "null",
+          "customerName": "string"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/execAuditTemplateTask",
+      "sourceParagraphRange": [
+        717,
+        767
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": "integer"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskExecute/listRunningScriptTasks",
+      "sourceParagraphRange": [
+        855,
+        962
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "scriptTaskId": "integer",
+              "srcScriptUuid": "string",
+              "taskName": "string",
+              "eachNum": "integer",
+              "execUser": "null",
+              "taskScheduler": "integer",
+              "taskTime": "null",
+              "taskCron": "null",
+              "publishDesc": "null",
+              "startUser": "string",
+              "startTime": "string",
+              "endTime": "null",
+              "timeout": "null",
+              "taskTimeForDispaly": "null",
+              "type": "integer",
+              "driveMode": "integer",
+              "startType": "null",
+              "readyToExecute": "null",
+              "creatorId": "null",
+              "creatorName": "null",
+              "updatorId": "null",
+              "updatorName": "null",
+              "createTime": "null",
+              "updateTime": "null",
+              "iscriptAuditRelationId": "null",
+              "auditType": "null",
+              "state": "null",
+              "applyTime": "null",
+              "auditTime": "null",
+              "auditUser": "null",
+              "applyUser": "string",
+              "auditUserId": "null",
+              "applyUserId": "null",
+              "scriptCategoryName": "string",
+              "scriptTaskInstanceId": "integer",
+              "scriptTaskInstanceState": "integer",
+              "runAgentCount": "integer",
+              "level": "integer",
+              "elapsedTime": "integer",
+              "scriptTaskSource": "null",
+              "version": "string",
+              "scriptNameZh": "string",
+              "scriptName": "string",
+              "workOrderNumber": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer",
+          "size": "integer",
+          "startRow": "integer",
+          "endRow": "integer",
+          "pages": "integer",
+          "prePage": "integer",
+          "nextPage": "integer",
+          "isFirstPage": "boolean",
+          "isLastPage": "boolean",
+          "hasPreviousPage": "boolean",
+          "hasNextPage": "boolean",
+          "navigatePages": "integer",
+          "navigatepageNums": [
+            "integer"
+          ],
+          "navigateFirstPage": "integer",
+          "navigateLastPage": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/category/selectCategoryListDFS",
+      "sourceParagraphRange": [
+        963,
+        1047
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": [
+          {
+            "id": "integer",
+            "parentId": "null",
+            "code": "string",
+            "name": "string",
+            "sort": "null",
+            "level": "integer",
+            "description": "null",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "updatorId": "integer",
+            "updatorName": "string",
+            "createTime": "string",
+            "updateTime": "string",
+            "children": [
+              {
+                "id": "integer",
+                "parentId": "integer",
+                "code": "string",
+                "name": "string",
+                "sort": "null",
+                "level": "integer",
+                "description": "string",
+                "creatorId": "integer",
+                "creatorName": "string",
+                "updatorId": "integer",
+                "updatorName": "string",
+                "createTime": "string",
+                "updateTime": "string",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/myScript/getScriptDetail",
+      "sourceParagraphRange": [
+        1048,
+        1196
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "scriptNameZh": "string",
+          "scriptName": "string",
+          "scriptType": "string",
+          "execuser": "null",
+          "id": "integer",
+          "uniqueUuid": "string",
+          "editState": "integer",
+          "deleted": "integer",
+          "scriptLabel": "string",
+          "categoryId": "integer",
+          "checkBeforeExec": "integer",
+          "share": "integer",
+          "whiteCommand": "integer",
+          "visibleType": "integer",
+          "platforms": [
+            "string"
+          ],
+          "femscript": "integer",
+          "creatorId": "integer",
+          "creatorName": "string",
+          "updatorId": "integer",
+          "updatorName": "string",
+          "createTime": "null",
+          "updateTime": "null",
+          "platform": "string",
+          "scriptSource": "integer",
+          "orgCode": "null",
+          "categoryPath": "string",
+          "categoryDto": {
+            "id": "integer",
+            "parentId": "null",
+            "code": "string",
+            "name": "string",
+            "sort": "integer",
+            "level": "integer",
+            "description": "string",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "updatorId": "integer",
+            "updatorName": "string",
+            "createTime": "string",
+            "updateTime": "string",
+            "children": "null"
+          },
+          "scriptVersionDto": {
+            "id": "integer",
+            "infoUniqueUuid": "string",
+            "srcScriptUuid": "string",
+            "version": "string",
+            "editState": "integer",
+            "useState": "integer",
+            "deleted": "integer",
+            "isDefault": "integer",
+            "description": "string",
+            "timeout": "integer",
+            "expectType": "integer",
+            "expectLastline": "string",
+            "paramflag": "integer",
+            "level": "integer",
+            "creatorId": "integer",
+            "creatorName": "string",
+            "updatorId": "integer",
+            "updatorName": "string",
+            "createTime": "string",
+            "updateTime": "string",
+            "parameterValidationDtoList": [
+              {
+                "id": "integer",
+                "srcScriptUuid": "string",
+                "paramType": "string",
+                "paramName": "string",
+                "paramDefaultValue": "string",
+                "paramDesc": "null",
+                "paramOrder": "integer",
+                "scriptParameterManagerId": "integer",
+                "creatorId": "integer",
+                "creatorName": "string",
+                "createTime": "string",
+                "paramCheckIid": "integer",
+                "ruleName": "null",
+                "checkRule": "null",
+                "ruleDes": "null"
+              }
+            ],
+            "scriptContentDto": {
+              "content": "string"
+            },
+            "variableList": [],
+            "functionList": [],
+            "dependentList": [],
+            "attachmentUploadDtoList": [
+              {
+                "name": "string",
+                "id": "null",
+                "response": {
+                  "id": "integer"
+                },
+                "size": "integer",
+                "contents": "string"
+              }
+            ]
+          },
+          "ignoreTipCmd": "null",
+          "hisVersionCount": "integer",
+          "insertedLabels": "null",
+          "removedLabels": "null",
+          "customerName": "string"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/queryTemplateGroupInfo",
+      "sourceParagraphRange": [
+        1197,
+        1238
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": [
+          {
+            "sysmComputerGroupId": "integer",
+            "cpName": "string",
+            "enName": "null",
+            "description": "null"
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/queryTemplateAgentInfo",
+      "sourceParagraphRange": [
+        1239,
+        1289
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": [
+          {
+            "id": "integer",
+            "sysmAgentInfoId": "integer",
+            "agentIp": "string",
+            "agentName": "string",
+            "agentPort": "integer",
+            "agentState": "null",
+            "createTime": "null",
+            "execUserName": "null",
+            "deviceName": "string",
+            "osName": "null",
+            "taskIpsId": "null",
+            "centerId": "null",
+            "centerName": "null",
+            "businessSystemNameList": "null"
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskExecute/stopScriptInstanceShell",
+      "sourceParagraphRange": [
+        1290,
+        1324
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/approvalApi/api/operation",
+      "sourceParagraphRange": [
+        1325,
+        1355
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "null",
+        "data": "null"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskExecute/scriptTaskStart",
+      "sourceParagraphRange": [
+        1404,
+        1436
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": "string"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskExecute/listTaskReadyToExecute",
+      "sourceParagraphRange": [
+        1437,
+        1534
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "scriptTaskId": "integer",
+              "uniqueUuid": "string",
+              "srcScriptUuid": "string",
+              "taskName": "string",
+              "eachNum": "integer",
+              "execUser": "null",
+              "taskScheduler": "integer",
+              "taskTime": "null",
+              "taskCron": "null",
+              "publishDesc": "null",
+              "startUser": "null",
+              "startTime": "null",
+              "endTime": "null",
+              "timeout": "null",
+              "taskTimeForDispaly": "null",
+              "type": "integer",
+              "driveMode": "integer",
+              "startType": "integer",
+              "readyToExecute": "null",
+              "creatorId": "null",
+              "creatorName": "null",
+              "updatorId": "null",
+              "updatorName": "null",
+              "createTime": "null",
+              "updateTime": "null",
+              "iscriptAuditRelationId": "integer",
+              "auditType": "null",
+              "state": "null",
+              "applyTime": "null",
+              "auditTime": "string",
+              "auditUser": "null",
+              "applyUser": "string",
+              "auditUserId": "null",
+              "applyUserId": "null",
+              "scriptCategoryName": "string",
+              "scriptTaskInstanceId": "null",
+              "scriptTaskInstanceState": "integer",
+              "runAgentCount": "null",
+              "level": "integer",
+              "elapsedTime": "null",
+              "scriptTaskSource": "null",
+              "version": "string",
+              "scriptNameZh": "string",
+              "scriptName": "string",
+              "workOrderNumber": "string",
+              "categoryId": "integer",
+              "itsmOrderStartTime": "null",
+              "itsmOrderEndTime": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer",
+          "size": "integer",
+          "startRow": "integer",
+          "endRow": "integer",
+          "pages": "integer",
+          "prePage": "integer",
+          "nextPage": "integer",
+          "isFirstPage": "boolean",
+          "isLastPage": "boolean",
+          "hasPreviousPage": "boolean",
+          "hasNextPage": "boolean",
+          "navigatePages": "integer",
+          "navigatepageNums": [
+            "integer"
+          ],
+          "navigateFirstPage": "integer",
+          "navigateLastPage": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/info/getTaskBindAgentInfo",
+      "sourceParagraphRange": [
+        1536,
+        1603
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "total": "integer",
+          "list": [
+            {
+              "sysmAgentInfoId": "integer",
+              "agentIp": "string",
+              "agentName": "string",
+              "agentPort": "integer",
+              "agentState": "null",
+              "execUserName": "null",
+              "deviceName": "string",
+              "osName": "null",
+              "taskIpsId": "integer",
+              "centerId": "null",
+              "centerName": "null",
+              "businessSystemNameList": "null",
+              "businessSystemCodeList": "null",
+              "machineRoom": "null",
+              "ipVfourNumber": "null",
+              "hostName": "string",
+              "tagNames": "null"
+            }
+          ],
+          "pageNum": "integer",
+          "pageSize": "integer",
+          "size": "integer",
+          "startRow": "integer",
+          "endRow": "integer",
+          "pages": "integer",
+          "prePage": "integer",
+          "nextPage": "integer",
+          "isFirstPage": "boolean",
+          "isLastPage": "boolean",
+          "hasPreviousPage": "boolean",
+          "hasNextPage": "boolean",
+          "navigatePages": "integer",
+          "navigatepageNums": [
+            "integer"
+          ],
+          "navigateFirstPage": "integer",
+          "navigateLastPage": "integer"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/scriptApi/taskTemplate/startCommonTask",
+      "sourceParagraphRange": [
+        1605,
+        1645
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": {
+          "auditId": "null",
+          "taskId": "integer"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/scriptApi/taskExecute/getRealTimeOutPutMessage",
+      "sourceParagraphRange": [
+        548,
+        569
+      ],
+      "responseShape": {
+        "code": "string",
+        "message": "string",
+        "data": "string"
+      }
+    }
+  ]
+}

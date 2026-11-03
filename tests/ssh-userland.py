@@ -27,10 +27,21 @@ with tempfile.TemporaryDirectory() as temp:
                 chunk=channel.recv(65536)
                 if not chunk:break
                 body+=chunk
-            result=subprocess.run(server.command,shell=True,input=body,capture_output=True,timeout=15)
-            if result.stdout:channel.sendall(result.stdout)
-            if result.stderr:channel.sendall_stderr(result.stderr)
-            channel.send_exit_status(result.returncode);channel.shutdown_write();channel.close()
+            proc=subprocess.Popen(server.command,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+            proc.stdin.write(body);proc.stdin.close()
+            def pump(stream,error=False):
+                try:
+                    while True:
+                        chunk=os.read(stream.fileno(),2048)
+                        if not chunk:break
+                        if error:channel.sendall_stderr(chunk)
+                        else:channel.sendall(chunk)
+                except (OSError,EOFError):pass
+            readers=[threading.Thread(target=pump,args=(proc.stdout,),daemon=True),threading.Thread(target=pump,args=(proc.stderr,True),daemon=True)]
+            for reader in readers:reader.start()
+            code=proc.wait(timeout=40)
+            for reader in readers:reader.join(3)
+            channel.send_exit_status(code);channel.shutdown_write();channel.close()
         except (EOFError,OSError,paramiko.SSHException):pass
         finally:
             if transport:transport.close()
@@ -43,6 +54,6 @@ with tempfile.TemporaryDirectory() as temp:
     threading.Thread(target=serve,daemon=True).start()
     env=os.environ.copy();env.update(YCYH_SSH_TEST='true',YCYH_SSH_USER='fixture',YCYH_SSH_KEY=str(p/'client'),YCYH_SSH_KNOWN_HOSTS=str(p/'known_hosts'),YCYH_SSH_PORT=str(port))
     try:
-        result=subprocess.run(['mvn','-B','-ntp','-pl','oversight','-am','-Dtest=SshIntegrationTest','-Dsurefire.failIfNoSpecifiedTests=false','test'],cwd=pathlib.Path(__file__).resolve().parents[1],env=env)
+        result=subprocess.run(['mvn','-B','-ntp','-pl','oversight','-am','-Dtest=SshIntegrationTest,V9HttpSshTest','-Dsurefire.failIfNoSpecifiedTests=false','test'],cwd=pathlib.Path(__file__).resolve().parents[1],env=env)
     finally:stop.set();sock.close()
     raise SystemExit(result.returncode)

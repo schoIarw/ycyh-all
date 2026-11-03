@@ -14,3 +14,16 @@ CREATE TABLE IF NOT EXISTS applications (
  created_at VARCHAR(40) NOT NULL, approved_at VARCHAR(40), finished_at VARCHAR(40),
  approver VARCHAR(100), reason VARCHAR(500)
 );
+
+CREATE TABLE IF NOT EXISTS v9_counter (id INTEGER PRIMARY KEY, last_id BIGINT NOT NULL);
+CREATE TABLE IF NOT EXISTS v9_objects (
+ kind VARCHAR(24) NOT NULL, id BIGINT NOT NULL, lookup_key VARCHAR(200),
+ PRIMARY KEY (kind,id)
+);
+CREATE TABLE IF NOT EXISTS v9_chunks (
+ kind VARCHAR(24) NOT NULL, id BIGINT NOT NULL, part_no INTEGER NOT NULL, payload VARCHAR(6000) NOT NULL,
+ PRIMARY KEY (kind,id,part_no)
+);
+CREATE TABLE IF NOT EXISTS v9_tokens (
+ token_hash VARCHAR(64) PRIMARY KEY, login_name VARCHAR(100) NOT NULL, expires_at BIGINT NOT NULL
+);

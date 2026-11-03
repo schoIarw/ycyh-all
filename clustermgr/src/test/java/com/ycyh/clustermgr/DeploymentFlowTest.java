@@ -37,7 +37,7 @@ class DeploymentFlowTest {
   RemoteSystems.Software sw=new RemoteSystems.Software();sw.name="elasticsearch-8.17.0-linux-x86_64.tar.gz";sw.path=sw.name;sw.sha256="a".repeat(64);when(remote.packages()).thenReturn(List.of(sw));
   when(remote.submit(anyString(),anyString(),anyList())).thenReturn(Map.of("applicationId","application1","uuid","script1"));
   DeploymentService.Create c=new DeploymentService.Create();c.name="test-cluster";c.packagePath=sw.path;c.hostIps=List.of("127.0.0.1","127.0.0.2");String cluster=service.create(c);
-  verify(remote,timeout(3000)).submit(eq(cluster),contains("framework_main"),argThat(t->t.size()==2));
+  verify(remote,timeout(3000)).submit(eq(cluster),argThat(config->{try{return json.readTree(Base64.getDecoder().decode(config)).path("nodes").size()==2;}catch(Exception e){return false;}}),argThat(t->t.size()==2));
   long deadline=System.nanoTime()+3_000_000_000L;while(!"application1".equals(db.queryForObject("SELECT application_id FROM clusters WHERE id=?",String.class,cluster))&&System.nanoTime()<deadline)Thread.sleep(20);
   when(remote.application("application1")).thenReturn(Map.of("status","PENDING"));service.refresh();assertTrue(service.tasks(cluster).stream().allMatch(t->t.get("status").equals("WAITING_APPROVAL")));
   when(remote.application("application1")).thenReturn(Map.of("status","RUNNING"));service.refresh();

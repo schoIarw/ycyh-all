@@ -18,6 +18,7 @@ public class DeploymentService {
  private final ThreadPoolExecutor workers=new ThreadPoolExecutor(2,2,0,TimeUnit.SECONDS,new ArrayBlockingQueue<>(16),new ThreadPoolExecutor.AbortPolicy());
  public DeploymentService(JdbcTemplate db,PlatformTransactionManager tm,Settings settings,RemoteSystems remote,ScriptRenderer renderer){
   this.db=db;this.tx=new TransactionTemplate(tm);this.settings=settings;this.remote=remote;this.renderer=renderer;
+  db.update("UPDATE deploy_tasks SET status='UNKNOWN',detail='Legacy UUID application; inspect original platform before continuing' WHERE status IN ('WAITING_APPROVAL','RUNNING') AND cluster_id IN (SELECT id FROM clusters WHERE application_id LIKE '%-%')");
   db.update("UPDATE deploy_tasks SET status='UNKNOWN',detail='Service restarted before application ID was persisted; inspect oversight applications' WHERE status='QUEUED'");
  }
  @PreDestroy void close(){workers.shutdownNow();}
@@ -29,6 +30,7 @@ public class DeploymentService {
   if(software.sha256==null||!software.sha256.matches("[a-f0-9]{64}")||software.path.contains("..")||software.path.startsWith("/")||!software.path.endsWith(".tar.gz")||!software.path.matches("[a-zA-Z0-9_./%~-]+"))throw bad("软件包路径或校验和不合法");
   if(db.queryForObject("SELECT COUNT(*) FROM clusters WHERE name=?",Integer.class,req.name)>0)throw bad("集群名已存在；失败部署请先核查远端目录");
   if(workers.getQueue().remainingCapacity()==0)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"部署队列已满");
+  if(req.hostIps.stream().map(settings.hosts::get).distinct().count()!=1)throw bad("V9一份任务仅支持一个执行用户，请选择执行用户相同的主机");
   String clusterId=UUID.randomUUID().toString();List<Map<String,Object>> configs=new ArrayList<>();List<Map<String,String>> targets=new ArrayList<>();
   tx.executeWithoutResult(status->{
    db.update("INSERT INTO clusters(id,name,package_path,sha256,created_at) VALUES(?,?,?,?,?)",clusterId,req.name,software.path,software.sha256,Instant.now().toString());
@@ -43,10 +45,10 @@ public class DeploymentService {
  }
  private void submit(String clusterId,List<Map<String,Object>> configs,List<Map<String,String>> targets){
   try{
-   Map<String,Object> app=remote.submit(clusterId,renderer.render(Map.of("nodes",configs)),targets);
+   Map<String,Object> app=remote.submit(clusterId,renderer.configuration(Map.of("nodes",configs)),targets);
    tx.executeWithoutResult(status->{
     db.update("UPDATE clusters SET application_id=? WHERE id=?",app.get("applicationId"),clusterId);
-    db.update("UPDATE deploy_tasks SET status='WAITING_APPROVAL',phase='WAITING_APPROVAL',script_uuid=?,detail='已合并为一份部署申请，等待oversight人工审批' WHERE cluster_id=?",app.get("uuid"),clusterId);
+    db.update("UPDATE deploy_tasks SET status='WAITING_APPROVAL',phase=CASE WHEN last_seq=0 THEN 'WAITING_APPROVAL' ELSE phase END,script_uuid=?,detail='已提交V9部署任务申请，等待审批后启动' WHERE cluster_id=?",app.get("uuid"),clusterId);
    });
   }catch(Exception e){db.update("UPDATE deploy_tasks SET status='UNKNOWN',detail='申请提交结果不确定，请到oversight按集群ID核查，勿重复提交' WHERE cluster_id=?",clusterId);}
  }

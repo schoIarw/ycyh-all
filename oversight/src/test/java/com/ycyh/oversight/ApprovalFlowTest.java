@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:oversight;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1","spring.datasource.username=sa","spring.datasource.password=","oversight.api-key=123456789012345678901234567890","oversight.admin-password=approval-password-123"})
+@SpringBootTest(properties={"oversight.legacy-enabled=true","spring.datasource.url=jdbc:h2:mem:oversight;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1","spring.datasource.username=sa","spring.datasource.password=","oversight.api-key=123456789012345678901234567890","oversight.admin-password=approval-password-123"})
 @AutoConfigureMockMvc
 class ApprovalFlowTest {
  @Autowired MockMvc mvc;@Autowired ObjectMapper json;@Autowired JdbcTemplate db;@Autowired ApplicationService service;

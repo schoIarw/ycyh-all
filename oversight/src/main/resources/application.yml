@@ -21,7 +21,7 @@ spring:
       max-file-size: 1MB
       max-request-size: 1MB
 oversight:
-  api-key: ${OVERSIGHT_API_KEY}
+  api-key: ${OVERSIGHT_API_KEY:}
   allowed-hosts: ${SSH_ALLOWED_HOSTS:127.0.0.1}
   allowed-users: ${SSH_ALLOWED_USERS:es}
   private-key: ${SSH_PRIVATE_KEY:/home/oversight/.ssh/id_ed25519}
@@ -31,3 +31,9 @@ oversight:
   timeout-seconds: ${SSH_TIMEOUT_SECONDS:1200}
   admin-user: ${OVERSIGHT_ADMIN_USER:approver}
   admin-password: ${OVERSIGHT_ADMIN_PASSWORD}
+  legacy-enabled: ${OVERSIGHT_LEGACY_ENABLED:false}
+  v9:
+    operator: ${OVERSIGHT_OPERATOR:operator}
+    token-ttl-seconds: ${OVERSIGHT_TOKEN_TTL_SECONDS:7200}
+    operator-id: ${OVERSIGHT_OPERATOR_ID:1}
+    reviewer-id: ${OVERSIGHT_REVIEWER_ID:2}

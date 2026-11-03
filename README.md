@@ -1,6 +1,6 @@
 # ycyh-all
 
-YCYH 项目集群部署验证工程，版本 **0.1.0**。三个子工程独立运行；顶层 Maven 只聚合 Java 子工程，未来 Python、Go 等子工程可放在同一仓库并使用各自构建工具。
+YCYH 项目集群部署验证工程，Java构建版本 **0.1.0**；main已对齐20261016版V9脚本服务化协议，既有0.1标签保持原提交。三个子工程独立运行；顶层 Maven 只聚合 Java 子工程，未来 Python、Go 等子工程可放在同一仓库并使用各自构建工具。
 
 | 子工程 | 技术 | 默认端口 | 功能 |
 |---|---|---:|---|
@@ -8,22 +8,9 @@ YCYH 项目集群部署验证工程，版本 **0.1.0**。三个子工程独立�
 | warehouse | JDK 11 标准库 HttpServer，无第三方运行时依赖 | 8082 | 目录清单、文件下载、带 SHA-256 的组件目录 |
 | clustermgr | JDK 11 / Maven / Spring Boot / Thymeleaf / JDBC | 8080 | 登录、Banner 与用户信息、ES 管理菜单、部署申请、主机进度、安装与错误回传 |
 
-**本版本的审批流程：添加一个集群，只提交一份 DEPLOYMENT 申请。** 该申请包括一份不可修改的组合脚本和全部目标主机，审批一次后由 oversight 并行 SSH 到各主机执行。clustermgr 不连接目标主机。
+**当前默认协议为V9。** [接口对齐与原文差异说明](docs/V9_PROTOCOL.md)；[机器可读OpenAPI](docs/v9-openapi.json)。22项接口使用secretToken及code/message/data，脚本按版本预登记，风险任务申请、审批和启动分开；白名单按文档直接调度。旧UUID上传/执行API默认关闭。
 
-```mermaid
-flowchart TD
- A[clustermgr 添加集群] --> B[warehouse 查询安装包及校验和]
- B --> C[生成单文件任务脚本]
- C --> D[oversight 持久化待审批申请]
- D --> E{人工审批}
- E -->|驳回| F[不执行并回传驳回状态]
- E -->|批准| G[登记脚本 UUID 并并行 SSH 执行]
- G --> H[远端完整安装与组网验证]
- H --> I[脚本回传阶段及错误]
- G --> J[oversight 汇总逐主机 1 或 0]
- I --> K[clustermgr 展示任务与日志]
- J --> K
-```
+clustermgr调用 `getScriptDetail → queryAgentInfoGroupRole → scriptExecAuditing` 提交一份多主机部署申请，审批后查询绑定ID并调用 `scriptTaskStart`。完整安装过程仍由一份脚本完成，不为每个阶段发起审批。
 
 ## 1. 下载包与源码构建
 
@@ -134,7 +121,10 @@ chmod 600 config/oversight.env config/clustermgr.env
 | 变量 | 服务 | 含义 |
 |---|---|---|
 | DB_URL / DB_USER / DB_PASSWORD | 两个后端 | 各自的数据库地址和凭据 |
-| OVERSIGHT_API_KEY | 两个后端 | 相同的服务间密钥，至少24字符 |
+| OVERSIGHT_USERNAME | clustermgr | V9换token的调用用户名，默认operator |
+| OVERSIGHT_AUDITOR_ID / OVERSIGHT_AUDITOR_NAME | clustermgr | 指定审批用户，模拟器默认2 / approver |
+| OVERSIGHT_OPERATOR / OVERSIGHT_OPERATOR_ID / OVERSIGHT_REVIEWER_ID | oversight | 调用用户名及两种身份的ID |
+| OVERSIGHT_SCRIPT_NAME | clustermgr | 预登记脚本名称，默认ycyh_es_install |
 | OVERSIGHT_ADMIN_USER / OVERSIGHT_ADMIN_PASSWORD | oversight | 审批页面账户；密码至少12字符 |
 | ADMIN_USER / ADMIN_PASSWORD | clustermgr | 集群管理账户；密码至少12字符 |
 | SSH_ALLOWED_HOSTS | oversight | 允许的主机 IP，英文逗号分隔，无空格 |
@@ -183,8 +173,8 @@ java -jar dist/clustermgr-0.1.0.jar
 1. 打开 `http://管理服务IP:8080`，使用配置的管理员账户登录。
 2. 左侧 **ES 管理 → ES 集群部署**，右上角 **添加集群**。
 3. 填写以小写字母开头的集群名，选择仓库 tar.gz，选择1—8台主机，提交一次部署申请。
-4. 集群列表进入“等待审批”。点击“打开审批”，在 oversight 用审批人账户登录，核对脚本、SHA-256、IP、用户，填写审批意见后批准或驳回。
-5. 批准后 oversight 先登记本次脚本，再并行执行全部目标主机；不再为每台主机、每个安装阶段申请审批。
+4. 集群列表进入“等待审批”。点击“打开审批”，用审批人账户核对脚本版本、参数、IP和用户，批准或驳回。
+5. 批准后任务进入待执行，clustermgr通过V9查询taskIpsId并调用启动接口；oversight并行SSH到目标主机，不再次上传脚本。
 6. clustermgr 的详情页面显示逐主机阶段与错误。最终成功需要该主机退出码为0，且回传最终 `SUCCEEDED`（该回传在 ES 节点数、集群名与健康状态验证通过后发出）。
 
 新建集群的首次引导配置在验证成功后从每台机器的 `elasticsearch.yml` 删除。安装默认目录 `$HOME/ycyh-es/集群名/es-N`，堆内存512 MiB，仅供验证；详细日志位于 `$HOME/ycyh-es/集群名/任务ID.log` 及 ES 自身 logs。
@@ -193,11 +183,11 @@ java -jar dist/clustermgr-0.1.0.jar
 
 ## 7. 结果语义与边界
 
-审批新增了等待环节，因此原来的“执行请求立即返回1/0”调整为：提交返回 HTTP202 与申请ID；通过查询申请获取状态；完成后结果接口返回纯文本 `1` 或 `0`。待审批与执行中返回 HTTP202 `PENDING`。未知状态也返回202 PENDING（须人工核查）。
+V9请求统一返回JSON code/message/data，不能按旧协议的HTTP202或纯文本1/0判断。任务申请返回taskId/auditId；审批用auditId，启动用taskId及绑定taskIpsId，输出用runtime.id。数字状态10运行、20完成、30异常、60终止。
 
-所有**脚本登记与执行调用**都要审批；登录、审批动作和只读状态查询属于该流程的控制/查询操作，不会触发脚本，也不递归创建审批申请。一次 DEPLOYMENT 的审批同时覆盖登记及整批执行。
+目录登记属于模拟器管理页面，原文没有上传接口。风险脚本审核后不自动启动；白名单不需要审批。当前ES预登记模板为风险等级3。SSH连接或平台重启可能留下未确认远端状态，不自动重新执行；旧版未结束任务应在升级前完成或人工核查。详见V9_PROTOCOL.md。
 
-管控结果 `1` 代表退出码0；`0` 包括非零退出、超时、SSH失败、队列满或驳回，不代表没有副作用、也不代表已回滚。调用或服务中断记为 UNKNOWN，不自动重复执行。现阶段仅支持新建部署，不提供扩缩容、ES 索引管理、集群删除、生产 TLS 配置、HA、多副本调度或真实业务负载验证。
+模拟器按文档提供username换token，不代表生产SSO；审批枚举未定义项、元数据和执行后端边界均在协议说明中列明。ES模板仍是隔离PoC，不提供生产TLS或扩缩容/索引管理；实际ES安装需目标环境验收。
 
 ## 8. 文档与测试
 
@@ -206,7 +196,7 @@ java -jar dist/clustermgr-0.1.0.jar
 - [脚本编写架构与规范](docs/SCRIPT_STANDARD.md)
 - [验证说明与结果](docs/VERIFICATION.md)
 - 自动化：`mvn verify`；真实 SSH：`bash tests/ssh-integration.sh`；受限容器备用：`python3 tests/ssh-userland.py`（额外需要测试依赖 paramiko）。
-- 数据库与真实 HTTP 冒烟：服务启动后 `python3 tests/http-smoke.py`；该测试批准脚本上传、驳回部署申请，不在目标主机安装 ES。
-- `.github/workflows/ci.yml` 在 main 推送时执行 JDK11 构建、SSH测试和 PostgreSQL/MySQL 冒烟；全部成功后创建不可移动的 `0.1` 标签，不创建 Release。
+- 数据库与真实 HTTP 冒烟：服务启动后 `python3 tests/http-smoke.py`；该测试登记大于64KiB的脚本、驳回V9部署申请，不在目标主机安装 ES。
+- `.github/workflows/ci.yml` 在 main 推送时执行JDK11、合同、SSH及PostgreSQL/MySQL冒烟；既有0.1标签不会被移动，不创建Release。
 - Git仓库仅提交源码、配置和文档，不提交 `dist/` 或 `target/` 中的二进制；克隆后运行 `bash bin/package.sh` 生成JAR，也可在 Actions 下载 `java11-jars` 构建产物。
 - 远端CI执行结果见仓库 Actions 记录；`docs/VERIFICATION.md` 记录本地初始验证范围。

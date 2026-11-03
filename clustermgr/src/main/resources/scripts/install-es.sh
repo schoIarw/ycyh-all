@@ -10,7 +10,7 @@ STAGING=''
 LOG_FILE=''
 load_config() {
   command -v python3 >/dev/null || { echo 'python3 required' >&2; exit 10; }
-  eval "$(python3 - '__CONFIG_BASE64__' <<'PYCONFIG'
+  eval "$(python3 - "${1:-__CONFIG_BASE64__}" <<'PYCONFIG'
 import base64,json,os,shlex,sys
 nodes=json.loads(base64.b64decode(sys.argv[1]))['nodes']
 matched=[n for n in nodes if n['host_ip']==os.environ.get('YCYH_TARGET_IP')]
@@ -66,7 +66,7 @@ run_stage() {
   log "Completed $1"
 }
 framework_main() {
-  load_config
+  load_config "${1:-}"
   trap 'on_error "$LINENO"' ERR
   trap cleanup EXIT
   command -v curl >/dev/null
@@ -84,18 +84,38 @@ framework_main() {
 
 # Elasticsearch adapter v1.0. PoC: ES 7.17 / 8.x Linux archives, no TLS/security.
 component_preflight() {
+  # V9 callers may supply parameters without passing through clustermgr.
+  python3 - "$CLUSTER_NAME" "$NODE_NAME" "$HOST_IP" "$SHA256" "$SEED_HOSTS" "$MASTER_NODES" "$EXPECTED_NODES" "$TASK_ID" "$PACKAGE_URL" "$CALLBACK_URL" <<'PYVALIDATE'
+import ipaddress,json,re,sys,uuid
+from urllib.parse import urlsplit
+cluster,node,host,sha,seeds,masters,count,task,package,callback=sys.argv[1:]
+if not re.fullmatch(r'[a-z][a-z0-9-]{0,47}',cluster):raise ValueError('Invalid cluster name')
+if not re.fullmatch(r'[a-zA-Z0-9_-]{1,64}',node):raise ValueError('Invalid node name')
+ipaddress.ip_address(host);uuid.UUID(task)
+if not re.fullmatch(r'[a-fA-F0-9]{64}',sha):raise ValueError('Invalid SHA-256')
+seeds=json.loads(seeds);masters=json.loads(masters);count=int(count)
+if not 1<=count<=8 or len(seeds)!=count or len(set(seeds))!=count or host not in seeds:raise ValueError('Invalid seed hosts')
+for seed in seeds:ipaddress.ip_address(seed)
+if len(masters)!=count or len(set(masters))!=count or node not in masters or any(not re.fullmatch(r'[a-zA-Z0-9_-]{1,64}',n) for n in masters):raise ValueError('Invalid master nodes')
+for value in (package,callback):
+    url=urlsplit(value)
+    if url.scheme not in ('http','https') or not url.hostname or url.username or url.password or url.fragment:raise ValueError('Invalid service URL')
+if not urlsplit(callback).path.endswith('/api/callbacks/'+task):raise ValueError('Callback task mismatch')
+PYVALIDATE
   [[ "$(id -u)" -ne 0 ]] || { log 'Elasticsearch must not run as root'; return 11; }
   [[ "$(uname -s)" == Linux ]]
   for tool in curl python3 sha256sum nohup sed; do command -v "$tool" >/dev/null; done
   [[ -r /proc/sys/vm/max_map_count ]] && [[ "$(cat /proc/sys/vm/max_map_count)" -ge 262144 ]] || { log 'Administrator must set vm.max_map_count >= 262144'; return 12; }
   [[ "$(ulimit -n)" == unlimited || "$(ulimit -n)" -ge 65535 ]] || { log 'nofile must be >=65535'; return 12; }
   BASE_DIR="$HOME/ycyh-es"
+  [[ ! -L "$BASE_DIR" ]] || return 14
   mkdir -p -- "$BASE_DIR"
   # A single ES instance per host; shared 9200/9300, lock covers every cluster.
   mkdir -- "$BASE_DIR/.deployment-lock" || { log 'Another deployment holds host lock'; return 13; }
   LOCK_DIR="$BASE_DIR/.deployment-lock"
   INSTALL_DIR="$BASE_DIR/$CLUSTER_NAME/$NODE_NAME"
   [[ ! -e "$INSTALL_DIR" && ! -L "$INSTALL_DIR" ]] || { log 'Existing installation found; refusing overwrite/retry'; return 14; }
+  [[ ! -L "$BASE_DIR/$CLUSTER_NAME" ]] || return 14
   mkdir -p -- "$BASE_DIR/$CLUSTER_NAME"
   LOG_FILE="$BASE_DIR/$CLUSTER_NAME/$TASK_ID.log"
   python3 - "$HOST_IP" <<'PYPORT'
@@ -191,4 +211,4 @@ PYHEALTH
   return 30
 }
 
-framework_main
+framework_main "$@"

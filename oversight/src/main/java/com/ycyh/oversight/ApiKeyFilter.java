@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="oversight.legacy-enabled",havingValue="true")
 public class ApiKeyFilter extends OncePerRequestFilter {
  private final byte[] key;
  public ApiKeyFilter(@Value("${oversight.api-key}") String key) {

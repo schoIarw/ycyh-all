@@ -24,8 +24,13 @@ clustermgr:
   admin-user: ${ADMIN_USER:admin}
   admin-password: ${ADMIN_PASSWORD}
   oversight-url: ${OVERSIGHT_URL:http://127.0.0.1:8081}
-  oversight-key: ${OVERSIGHT_API_KEY}
+  oversight-key: ${OVERSIGHT_API_KEY:}
   warehouse-url: ${WAREHOUSE_URL:http://127.0.0.1:8082}
   callback-base-url: ${CALLBACK_BASE_URL:http://127.0.0.1:8080}
   hosts: ${CLUSTER_HOSTS:127.0.0.1@es}
   allow-insecure-es: ${ALLOW_INSECURE_ES:false}
+  oversight-username: ${OVERSIGHT_USERNAME:operator}
+  oversight-auditor-id: ${OVERSIGHT_AUDITOR_ID:2}
+  oversight-auditor-name: ${OVERSIGHT_AUDITOR_NAME:approver}
+  oversight-script-name: ${OVERSIGHT_SCRIPT_NAME:ycyh_es_install}
+  oversight-rejected-audit-type: ${OVERSIGHT_REJECTED_AUDIT_TYPE:2}

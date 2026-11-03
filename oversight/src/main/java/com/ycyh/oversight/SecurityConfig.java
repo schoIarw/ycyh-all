@@ -13,10 +13,10 @@ public class SecurityConfig {
   return new InMemoryUserDetailsManager(User.withUsername(user).password("{bcrypt}"+new BCryptPasswordEncoder().encode(password)).roles("ADMIN").build());
  }
  @Bean SecurityFilterChain security(HttpSecurity http)throws Exception {
-  http.authorizeRequests().antMatchers("/error","/login","/style.css","/api/v1/**").permitAll().anyRequest().authenticated()
+  http.authorizeRequests().antMatchers("/error","/login","/style.css","/api/v1/**","/api/system/authority/getSecretToken","/system/authority/getSecretToken","/api/scriptApi/**","/scriptApi/**","/api/approvalApi/**","/approvalApi/**","/taskExecute/**").permitAll().anyRequest().authenticated()
    .and().formLogin().loginPage("/login").defaultSuccessUrl("/",true).permitAll()
    .and().logout().logoutSuccessUrl("/login?logout")
-   .and().csrf().ignoringAntMatchers("/api/v1/**");
+   .and().csrf().ignoringAntMatchers("/api/v1/**","/api/system/authority/getSecretToken","/system/authority/getSecretToken","/api/scriptApi/**","/scriptApi/**","/api/approvalApi/**","/approvalApi/**","/taskExecute/**");
   return http.build();
  }
 }

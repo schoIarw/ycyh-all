@@ -3,7 +3,7 @@
 import http.cookiejar,json,os,re,time,urllib.request,urllib.parse,urllib.error,uuid
 OV=os.environ.get('OVERSIGHT_URL','http://127.0.0.1:8081')
 CM=os.environ.get('CLUSTERMGR_URL','http://127.0.0.1:8080')
-KEY=os.environ['OVERSIGHT_API_KEY']
+KEY=os.environ.get('OVERSIGHT_API_KEY','')
 def client():return urllib.request.build_opener(urllib.request.ProxyHandler({}),urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def request(client,url,data=None,headers=None):
     with client.open(urllib.request.Request(url,data=data,headers=headers or {}),timeout=35) as r:return r.read().decode()
@@ -30,23 +30,40 @@ def poll(fun,check):
         if check(value):return value
         time.sleep(.3)
     raise AssertionError('Timed out waiting for expected status')
+
 anon=client()
-try:request(anon,OV+'/api/v1/applications/invalid');raise AssertionError('API key bypass')
-except urllib.error.HTTPError as e:assert e.code==401
+def v9(path,body=None,token=None,query=None):
+    headers={'secretToken':token} if token else {}
+    url=OV+'/api/'+path
+    if query:url+='?'+urllib.parse.urlencode(query)
+    if body is not None:headers['Content-Type']='application/json'
+    value=json.loads(request(anon,url,None if body is None else json.dumps(body).encode(),headers))
+    assert value.get('code')=='10000',path+': '+str(value)
+    return value['data']
+operator=v9('system/authority/getSecretToken',query={'username':os.environ.get('OVERSIGHT_OPERATOR','operator')})
+assert 'exipreTime' in operator and 'expireTime' not in operator
+operator_token=operator['token']
+missing=json.loads(request(anon,OV+'/api/scriptApi/taskApply/listTaskApply',b'{}',{'Content-Type':'application/json'}));assert missing['code']=='10602'
+script=v9('scriptApi/myScript/getScriptDetail',{'scriptName':'ycyh_es_install'},operator_token)
+assert script['scriptVersionDto']['id']>9007199254740991
+assert script['scriptVersionDto']['parameterValidationDtoList'][0]['paramName']=='configBase64'
 approver=login(OV,os.environ.get('OVERSIGHT_ADMIN_USER','approver'),os.environ['OVERSIGHT_ADMIN_PASSWORD'])
-data,headers=multipart({'type':'SHELL'},b'#!/bin/bash\nexit 0\n')
-app=json.loads(request(anon,OV+'/api/v1/scripts',data,headers));assert app['status']=='PENDING'
-page=request(approver,OV+'/approvals/'+app['applicationId']);assert '批准并执行' in page
-request(approver,OV+'/approvals/'+app['applicationId']+'/approve',urllib.parse.urlencode({'_csrf':csrf(page),'reason':'HTTP smoke test'}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})
-assert json.loads(request(anon,OV+'/api/v1/applications/'+app['applicationId'],headers={'X-API-Key':KEY}))['result']==1
+# A >64KiB script tests real MySQL/PostgreSQL chunk persistence through the admin UI.
+source='#!/bin/bash\n#'+'x'*80000+'\nprintf 0\n'
+name='fixture-'+uuid.uuid4().hex[:8]
+registration={'scripts':[{'scriptName':name,'scriptNameZh':name,'scriptType':'sh','execuser':'es','scriptVersionDto':{'level':3,'scriptContentDto':{'content':source}}}]}
+page=request(approver,OV+'/catalog');data,headers=multipart({'_csrf':csrf(page)},json.dumps(registration).encode());headers.pop('X-API-Key',None)
+request(approver,OV+'/catalog/import',data,headers)
+assert v9('scriptApi/myScript/getScriptDetail',{'scriptName':name},operator_token)['scriptVersionDto']['scriptContentDto']['content']==source
 admin=login(CM,os.environ.get('ADMIN_USER','admin'),os.environ['ADMIN_PASSWORD'])
 page=request(admin,CM+'/');token=re.search(r'name="csrf-token" content="([^"]+)"',page).group(1)
 packages=json.loads(request(admin,CM+'/api/packages'));hosts=json.loads(request(admin,CM+'/api/hosts'));assert packages and hosts
 payload={'name':'smoke-'+uuid.uuid4().hex[:8],'packagePath':packages[0]['path'],'hostIps':[hosts[0]['ip']]}
 c=json.loads(request(admin,CM+'/api/clusters',json.dumps(payload).encode(),{'Content-Type':'application/json','X-CSRF-TOKEN':token}))
-cluster=poll(lambda:next(x for x in json.loads(request(admin,CM+'/api/clusters')) if x['id']==c['id']),lambda x:x['status']=='WAITING_APPROVAL')
-page=request(approver,cluster['approvalUrl']);assert 'DEPLOYMENT' in page
+cluster=poll(lambda:next(x for x in json.loads(request(admin,CM+'/api/clusters')) if x['id']==c['id']),lambda x:x['status'] in ('WAITING_APPROVAL','UNKNOWN'))
+assert cluster['status']=='WAITING_APPROVAL',cluster
+page=request(approver,cluster['approvalUrl']);assert '批准，等待启动' in page
 request(approver,cluster['approvalUrl']+'/reject',urllib.parse.urlencode({'_csrf':csrf(page),'reason':'Smoke: intentionally rejected; no SSH allowed'}).encode(),{'Content-Type':'application/x-www-form-urlencoded'})
 cluster=poll(lambda:next(x for x in json.loads(request(admin,CM+'/api/clusters')) if x['id']==c['id']),lambda x:x['status']=='REJECTED')
 assert len(cluster['tasks'])==1
-print('PASS: real HTTP login, CSRF, database persistence, approved upload, one combined deployment request, rejection propagated; no remote execution')
+print('PASS: V9 token/header, int64 IDs, >64KiB script persistence, real UI/CSRF, one version-based deployment application, rejection propagated; no remote installation')
